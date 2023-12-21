@@ -137,3 +137,29 @@ export const verifyForgotPassword = async (req, res, next) => {
 
     }
 }
+export const changePassword= async(req,res,next)=>{
+    try {
+        const{oldPassword,newPassword}=req.body;
+   
+        const userModel=await user.findOne( {_id:req.userId});
+        const unHash = bcrypt.compareSync(
+            oldPassword,
+            userModel.password
+        );
+       
+        if (!unHash) {
+            return next(CustomError.createError("Incorrect Old Password", 400));
+            
+        }
+        const hashpass = bcrypt.hashSync(
+            newPassword,
+            "$2b$12$OSHUicJPx99s9FVWucVZKu"
+        );
+        const updateDetails= await user.findOneAndUpdate({_id:req.userId},{password:hashpass});
+        return next(CustomSuccess.createSuccess({ updateDetails }, "Password Changed Sucessfully", 200));
+
+       
+    } catch (error) {
+        return next(CustomError.createError(error.message, 400));
+    }
+}
