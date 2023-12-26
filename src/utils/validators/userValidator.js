@@ -41,6 +41,40 @@ export const loginValidator = joi.object({
         .required(),
 
 });
+
+export const profileValidator = joi.object({
+
+    firstName: joi
+        .string()
+
+
+        .required(),
+    lastName: joi
+        .string()
+
+
+        .required(),
+
+    industry: joi
+        .string()
+
+
+        .required(),
+
+    gender: joi
+        .string()
+
+
+        .required(),
+
+    bio: joi
+        .string()
+
+
+        .required(),
+
+
+});
 export const OtpValidator = joi.object({
 
     otpCode: joi.required(),

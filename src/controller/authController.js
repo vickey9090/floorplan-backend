@@ -3,7 +3,7 @@ import CustomError from "../utils/Response/CustomError.js";
 import bcrypt from "bcrypt";
 import { user } from "../model/userModel.js";
 import { OtpTable } from "../model/otpModel.js";
-import { signUpValidator, OtpValidator, loginValidator } from "../utils/validators/userValidator.js";
+import { signUpValidator, OtpValidator, loginValidator,profileValidator } from "../utils/validators/userValidator.js";
 import { generateToken } from "../utils/generateToken.js";
 
 
@@ -161,5 +161,27 @@ export const changePassword= async(req,res,next)=>{
        
     } catch (error) {
         return next(CustomError.createError(error.message, 400));
+    }
+}
+export const CreateProfile= async(req, res, next) => {
+    try {
+        await profileValidator.validateAsync(req.body);
+
+        const{firstName,lastName,industry,gender,bio}=req.body;
+        const userModel= await user.findOneAndUpdate({_id:req.userId,},{firstName,lastName,industry,gender,bio,isProfileCreated:true});
+        if (!userModel) {
+            return next(CustomError.createError("User not found", 400));
+            
+        }
+        if (userModel.isProfileCreated) {
+            return next(CustomError.createError("Profile Already Created", 400));
+            
+        }
+        console.log(userModel);
+        return next(CustomSuccess.createSuccess({ userModel }, "Profile Created Sucessfully", 200));
+
+    } catch (err) {
+        return next(CustomError.createError(err.message, 400));
+        
     }
 }
