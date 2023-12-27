@@ -2,55 +2,56 @@ import mongoose from "mongoose";
 
 
 const userModel = mongoose.Schema({
-    firstName:{
+    firstName: {
         type: mongoose.Schema.Types.String,
-     
+
     },
-    lastName:{
+    lastName: {
         type: mongoose.Schema.Types.String,
     },
-    email:{
+    email: {
         type: mongoose.Schema.Types.String,
         required: true,
         unique: true,
     },
-    password:{
-        type: mongoose.Schema.Types.String,
-       
-    },
-    industry:{
+    password: {
         type: mongoose.Schema.Types.String,
 
     },
-    gender:{
-        type: mongoose.Schema.Types.String,
-        enum:["Male","Female"],
-    },
-    bio:{
+    industry: {
         type: mongoose.Schema.Types.String,
 
     },
-    isVerified:{
+    gender: {
+        type: mongoose.Schema.Types.String,
+        enum: ["Male", "Female"],
+    },
+    bio: {
+        type: mongoose.Schema.Types.String,
+
+    },
+    isVerified: {
         type: mongoose.Schema.Types.Boolean,
         default: false,
     },
-    userType:{
+    userType: {
         type: mongoose.Schema.Types.String,
-        enum:["User","Client","Business"],
-        
+        enum: ["User", "Client", "Business"],
+
 
     },
-    isProfileCreated:{
+    isProfileCreated: {
         type: mongoose.Schema.Types.Boolean,
         default: false,
     },
-    devices:[{
+    devices: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: "Devices"
     }],
-    image:{
-        type: mongoose.Schema.Types.String,
+    image: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "media",
 
     }
 })
-export const user= mongoose.model("user",userModel);
+export const user = mongoose.model("user", userModel);

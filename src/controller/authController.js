@@ -1,9 +1,10 @@
 import CustomSuccess from "../utils/Response/CustomSuccess.js";
 import CustomError from "../utils/Response/CustomError.js";
-import bcrypt from "bcrypt";
+// import bcrypt from "bcrypt";
 import { user } from "../model/userModel.js";
 import { OtpTable } from "../model/otpModel.js";
-import { signUpValidator, OtpValidator, loginValidator,profileValidator } from "../utils/validators/userValidator.js";
+import { mediaModel } from "../model/mediaModel.js";
+import { signUpValidator, OtpValidator, loginValidator, profileValidator } from "../utils/validators/userValidator.js";
 import { generateToken } from "../utils/generateToken.js";
 
 
@@ -137,51 +138,55 @@ export const verifyForgotPassword = async (req, res, next) => {
 
     }
 }
-export const changePassword= async(req,res,next)=>{
+export const changePassword = async (req, res, next) => {
     try {
-        const{oldPassword,newPassword}=req.body;
-   
-        const userModel=await user.findOne( {_id:req.userId});
+        const { oldPassword, newPassword } = req.body;
+
+        const userModel = await user.findOne({ _id: req.userId });
         const unHash = bcrypt.compareSync(
             oldPassword,
             userModel.password
         );
-       
+
         if (!unHash) {
             return next(CustomError.createError("Incorrect Old Password", 400));
-            
+
         }
         const hashpass = bcrypt.hashSync(
             newPassword,
             "$2b$12$OSHUicJPx99s9FVWucVZKu"
         );
-        const updateDetails= await user.findOneAndUpdate({_id:req.userId},{password:hashpass});
+        const updateDetails = await user.findOneAndUpdate({ _id: req.userId }, { password: hashpass });
         return next(CustomSuccess.createSuccess({ updateDetails }, "Password Changed Sucessfully", 200));
 
-       
+
     } catch (error) {
         return next(CustomError.createError(error.message, 400));
     }
 }
-export const CreateProfile= async(req, res, next) => {
+export const CreateProfile = async (req, res, next) => {
     try {
+        console.log(req.file);
         await profileValidator.validateAsync(req.body);
 
-        const{firstName,lastName,industry,gender,bio}=req.body;
-        const userModel= await user.findOneAndUpdate({_id:req.userId,},{firstName,lastName,industry,gender,bio,isProfileCreated:true});
+        const { firstName, lastName, industry, gender, bio, userid } = req.body;
+        if (!req.file) {
+            return next(CustomError.createError("Profile image is required", 400));
+
+        }
+        const mediaType = req.file.mimetype.split("/")[0];
+        const media = await mediaModel.create({ mediaType: mediaType, mediaUrl: req.file.path, userid, })
+        const userModel = await user.findByIdAndUpdate(req.userId, { firstName, lastName, industry, gender, bio, isProfileCreated: true, image: media._id }, { new: true });
         if (!userModel) {
             return next(CustomError.createError("User not found", 400));
-            
+
         }
-        if (userModel.isProfileCreated) {
-            return next(CustomError.createError("Profile Already Created", 400));
-            
-        }
+
         console.log(userModel);
         return next(CustomSuccess.createSuccess({ userModel }, "Profile Created Sucessfully", 200));
 
     } catch (err) {
         return next(CustomError.createError(err.message, 400));
-        
+
     }
 }
